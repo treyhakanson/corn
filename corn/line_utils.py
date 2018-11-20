@@ -9,6 +9,13 @@ def slope(x1, y1, x2, y2):
     return m
 
 
+def dist(p, q):
+    x1, y1 = p
+    x2, y2 = q
+    d = np.sqrt(np.square(x2 - x1) + np.square(y2 - y1))
+    return d
+
+
 def ang_dist(m1, m2):
     theta1 = np.arctan(m1)
     theta2 = np.arctan(m2)
@@ -27,17 +34,23 @@ def scale_line(x1, y1, x2, y2, l):
 
 
 def on_segment(p, q, r):
-    if (
-        q[0] <= max(p[0], r[0]) and q[0] >= min(p[0], r[0]) and
-        q[1] <= max(p[1], r[1]) and q[1] >= min(p[1], r[1])
-    ):
-        return True
-    return False
+    x1, y1 = p
+    x2, y2 = q
+    x3, y3 = r
+
+    return (
+        x2 <= max(x1, x3) and x2 >= min(x1, x3) and
+        y2 <= max(y1, y3) and y2 >= min(y1, y3)
+    )
 
 
 def orientation(p, q, r):
-    val = ((q[1] - p[1]) * (r[0] - q[0]) -
-           (q[0] - p[0]) * (r[1] - q[1]))
+    x1, y1 = p
+    x2, y2 = q
+    x3, y3 = r
+    val = ((y2 - y1) * (x3 - x2) -
+           (x2 - x1) * (y3 - y2))
+
     if val == 0:
         return 0  # colinear
     elif val > 0:
@@ -46,31 +59,21 @@ def orientation(p, q, r):
         return 2  # counter-clockwise
 
 
-def do_intersect(p1, q1, p2, q2):
+def has_intersection(p1, q1, p2, q2):
+    # Compute orientations
     o1 = orientation(p1, q1, p2)
     o2 = orientation(p1, q1, q2)
     o3 = orientation(p2, q2, p1)
     o4 = orientation(p2, q2, q1)
+    interset = False
 
-    # General case
-    if (o1 != o2 and o3 != o4):
-        return True
+    # Base case
+    interset = interset or (o1 != o2 and o3 != o4)
 
     # Special Cases
-    # p1, q1 and p2 are colinear and p2 lies on segment p1q1
-    if (o1 == 0 and on_segment(p1, p2, q1)):
-        return True
+    interset = interset or (o1 == 0 and on_segment(p1, p2, q1))
+    interset = interset or (o2 == 0 and on_segment(p1, q2, q1))
+    interset = interset or (o3 == 0 and on_segment(p2, p1, q2))
+    interset = interset or (o4 == 0 and on_segment(p2, q1, q2))
 
-    # p1, q1 and p2 are colinear and q2 lies on segment p1q1
-    if (o2 == 0 and on_segment(p1, q2, q1)):
-        return True
-
-    # p2, q2 and p1 are colinear and p1 lies on segment p2q2
-    if (o3 == 0 and on_segment(p2, p1, q2)):
-        return True
-
-    # p2, q2 and q1 are colinear and q1 lies on segment p2q2
-    if (o4 == 0 and on_segment(p2, q1, q2)):
-        return True
-
-    return False  # Doesn't fall in any of the above cases
+    return interset

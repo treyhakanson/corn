@@ -1,6 +1,20 @@
+from pathlib import Path
 import cv2
 import numpy as np
 from . import line_utils
+
+
+"""
+Utility to compute lines falling on rows of corn
+
+Assumptions:
+
+- Rows of corn are approximately parallel
+- Rows of corn within the same group are not offset:
+    / / /         / / /
+   / / /   vs.    / / /
+  / / /         / / /
+"""
 
 
 def take_rng(data, low, high):
@@ -19,7 +33,7 @@ def show_image(img):
     cv2.destroyAllWindows()
 
 
-def find_in_image(imgfname):
+def find_in_image(imgfname, output=False):
     # Read in the image, perform some initial formatting and convert to black
     # and white
     img = cv2.imread(imgfname)
@@ -59,8 +73,6 @@ def find_in_image(imgfname):
     lines = lines[sorted_idx]
 
     # Filter out lines that vary significantly from the median
-    # NOTE: this makes the assumption that the rows of corn are approximately
-    # parallel
     para_thresh = 3 * np.pi / 180  # 3deg
     j = 0
     idx = np.zeros(len(lines), dtype=int)
@@ -78,11 +90,14 @@ def find_in_image(imgfname):
     for i, line1 in enumerate(lines, 0):
         unique = True
         for line2 in lines[i + 1:]:
+            # Scale up the segements to span the image
             p1 = line_utils.scale_line(*line1[0], h)
             q1 = line_utils.scale_line(*line1[0], -h)
             p2 = line_utils.scale_line(*line2[0], h)
             q2 = line_utils.scale_line(*line2[0], -h)
-            if line_utils.do_intersect(p1, q1, p2, q2):
+
+            # Check for lines intersecting
+            if line_utils.has_intersection(p1, q1, p2, q2):
                 unique = False
                 break
         if unique:
@@ -97,6 +112,10 @@ def find_in_image(imgfname):
         x4, y4 = line_utils.scale_line(*line[0], -h)
         cv2.line(img, (x3, y3), (x4, y4), (0, 0, 255), 2)
     show_image(img)
+
+    # Output the image, if the flag is given
+    if output:
+        cv2.imwrite(Path(imgfname).name, img)
 
     # Return the results
     return lines
