@@ -12,12 +12,12 @@ It can now be imported from your environment:
 ```py
 from corn import finder as cf
 
-estimated_corn_rows = cf.find_in_image("path/to/corn.jpg")
+estimated_corn_lines = cf.find_in_image("path/to/corn.jpg")
 
-print(estimated_corn_rows)
+print(estimated_corn_lines)
 # [
-#   [rho1, theta1],
-#   [rho2, theta2],
+#   [x1, y1, x2, y2],
+#   [x1, y1, x2, y2],
 #   ...
 # ]
 ```
@@ -25,5 +25,8 @@ print(estimated_corn_rows)
 Or via the provided CLI:
 
 ```py
-python cli.py path/to/corn.jpg
+python cli.py path/to/corn.jpg \
+  --output-lines path/to/output.csv
 ```
+
+Execute the CLI with the `--help` flag for more information on available utilities.
