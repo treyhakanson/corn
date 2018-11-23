@@ -105,17 +105,16 @@ def find_in_image(imgfname, output=False):
             j += 1
     lines = lines[np.trim_zeros(idx)]
 
-    # Draw the lines on the original image, and show the result
-    h, _, _ = img.shape
-    for line in lines:
-        x3, y3 = line_utils.scale_line(*line[0], h)
-        x4, y4 = line_utils.scale_line(*line[0], -h)
-        cv2.line(img, (x3, y3), (x4, y4), (0, 0, 255), 2)
-    show_image(img)
-
-    # Output the image, if the flag is given
+    # Draw the lines on the original image, and show/save the result if the
+    # flag is given
     if output:
+        h, _, _ = img.shape
+        for line in lines:
+            x3, y3 = line_utils.scale_line(*line[0], h)
+            x4, y4 = line_utils.scale_line(*line[0], -h)
+            cv2.line(img, (x3, y3), (x4, y4), (0, 0, 255), 2)
         cv2.imwrite(Path(imgfname).name, img)
+        show_image(img)
 
     # Return the results
     return lines
