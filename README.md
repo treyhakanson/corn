@@ -24,7 +24,7 @@ print(estimated_corn_lines)
 
 Or via the provided CLI:
 
-```py
+```sh
 python cli.py path/to/corn.jpg \
   --output-lines path/to/output.csv
 ```
